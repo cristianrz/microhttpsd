@@ -1,0 +1,82 @@
+#!/bin/sh
+
+set -eu
+
+# Set default values
+home=.
+openssl_pid=
+input_fifo=$(mktemp -u "$XDG_RUNTIME_DIR/ehttpd1.XXXXXX")
+output_fifo=$(mktemp -u "$XDG_RUNTIME_DIR/ehttpd2.XXXXXX")
+listen_port="8443"
+key_file="key.pem"
+cert_file="cert.pem"
+verbose=false
+
+cleanup() {
+	log "Cleaning up..."
+	rm -f "$input_fifo" "$output_fifo"
+	kill -TERM "$openssl_pid" 2>/dev/null || true
+}
+
+run_httpd() {
+	log "Starting httpd loop..."
+	while true; do
+		log "=> busybox httpd -f -h $home -i >$input_fifo <$output_fifo"
+		busybox httpd -f -h "$home" -i >"$input_fifo" <"$output_fifo"
+		log "Restarting httpd loop..."
+	done
+}
+
+usage() {
+	cat << EOF
+Usage: $(basename "$0") [-p <port>] [-k <key_file>] [-c <cert_file>] [-h] [-v]
+
+Options:
+	-p <port>      Port to listen on (default: 8443)
+	-k <key_file>  Path to private key file (default: key.pem)
+	-c <cert_file> Path to certificate file (default: cert.pem)
+	-d <home>      Home directory (default: .)
+	-v             Enable verbose output
+	-h             Show this help message
+EOF
+}
+
+log() { if "$verbose"; then printf '%s\n' "$*"; fi; }
+
+# Parse command line arguments
+while getopts "c:d:hk:p:v" opt; do
+	case $opt in
+	c) cert_file="$OPTARG" ;;
+	d) home="$OPTARG" ;;
+	h)
+		usage
+		exit 0
+		;;
+	k) key_file="$OPTARG" ;;
+	p) listen_port="$OPTARG" ;;
+	v) verbose=true ;;
+	:)
+		echo "Option -$OPTARG requires an argument" >&2
+		usage >&2
+		exit 1
+		;;
+	\?)
+		echo "Invalid option -$OPTARG" >&2
+		usage >&2
+		exit 1
+		;;
+	esac
+done
+
+trap 'cleanup' INT TERM EXIT
+
+mkfifo "$input_fifo"
+mkfifo "$output_fifo"
+
+log "=> openssl s_server -key $key_file -cert $cert_file -accept $listen_port -quiet <$input_fifo >$output_fifo"
+openssl s_server -key "$key_file" -cert "$cert_file" -accept "$listen_port" -quiet <"$input_fifo" >"$output_fifo" &
+openssl_pid="$!"
+log "Started openssl server with PID $openssl_pid on port $listen_port."
+
+run_httpd
+

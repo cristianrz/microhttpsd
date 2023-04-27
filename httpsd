@@ -12,6 +12,11 @@ key_file="key.pem"
 cert_file="cert.pem"
 verbose=false
 
+inetd_server() (
+	"$verbose" && set -x
+	busybox httpd -f -h "$home" -i
+)
+
 cleanup() {
 	log "Cleaning up..."
 	rm -f "$input_fifo" "$output_fifo"
@@ -21,8 +26,7 @@ cleanup() {
 run_httpd() {
 	log "Starting httpd loop..."
 	while true; do
-		log "=> busybox httpd -f -h $home -i >$input_fifo <$output_fifo"
-		busybox httpd -f -h "$home" -i >"$input_fifo" <"$output_fifo"
+		inetd_server >"$input_fifo" <"$output_fifo"
 		log "Restarting httpd loop..."
 	done
 }

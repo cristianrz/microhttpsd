@@ -32,16 +32,16 @@ run_httpd() {
 }
 
 usage() {
-	cat << EOF
+	cat <<EOF
 Usage: $(basename "$0") [-p <port>] [-k <key_file>] [-c <cert_file>] [-h] [-v]
 
 Options:
-	-p <port>      Port to listen on (default: 8443)
-	-k <key_file>  Path to private key file (default: key.pem)
-	-c <cert_file> Path to certificate file (default: cert.pem)
-	-d <home>      Home directory (default: .)
-	-v             Enable verbose output
-	-h             Show this help message
+    -p <port>      Port to listen on (default: 8443)
+    -k <key_file>  Path to private key file (default: key.pem)
+    -c <cert_file> Path to certificate file (default: cert.pem)
+    -d <home>      Home directory (default: .)
+    -v             Enable verbose output
+    -h             Show this help message
 EOF
 }
 
@@ -83,4 +83,3 @@ openssl_pid="$!"
 log "Started openssl server with PID $openssl_pid on port $listen_port."
 
 run_httpd
-

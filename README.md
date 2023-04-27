@@ -1,8 +1,12 @@
 # ehttpd
 
-ehttpd is a simple script that runs a secure web server on a Linux system using
-openssl and busybox httpd. The web server can serve static files from a
+ehttpd is a simple script that runs a secure web server on a Linux system only
+using `openssl` and `busybox httpd`. The web server can serve static files from a
 specified directory and supports HTTPS connections.
+
+`openssl` provides a way to server static files, however it is very rudimentary
+(`/` won't serve `index.html`, etc) and sometimes I would like to serve an
+internal HTTPS server without installing any additional software.
 
 ## Usage
 

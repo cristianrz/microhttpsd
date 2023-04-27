@@ -1,6 +1,6 @@
-# ehttpd
+# microhttpsd
 
-ehttpd is a simple script that runs a secure web server on a Linux system only
+microhttpsd is a simple script that runs a secure web server on a Linux system only
 using `openssl` and `busybox httpd`. The web server can serve static files from a
 specified directory and supports HTTPS connections.
 
@@ -11,7 +11,7 @@ internal HTTPS server without installing any additional software.
 ## Usage
 
 ```
-Usage: ehttpd [-p <port>] [-k <key_file>] [-c <cert_file>] [-d <home>] [-v] [-h]
+Usage: microhttpsd [-p <port>] [-k <key_file>] [-c <cert_file>] [-d <home>] [-v] [-h]
 
 Options:
     -p <port>      Port to listen on (default: 8443)
@@ -22,28 +22,28 @@ Options:
     -h             Show this help message
 ```
 
-To run the web server, simply execute the ehttpd script with the desired
+To run the web server, simply execute the microhttpsd script with the desired
 options.
 
 For example, to serve files from the `/var/www/html` directory on port 443
 (HTTPS), use:
 
 ```
-./ehttpd -p 443 -d /var/www/html
+./microhttpsd -p 443 -d /var/www/html
 ```
 
 ## Implementation Details
 
-ehttpd creates two named pipes (`input_fifo` and `output_fifo`) to communicate
+microhttpsd creates two named pipes (`input_fifo` and `output_fifo`) to communicate
 between `openssl` and `busybox httpd`. `openssl` listens for incoming HTTPS
 connections and sends incoming requests to `busybox httpd` through the
 `input_fifo` pipe. `busybox httpd` serves the requested files and sends the
 response back through the `output_fifo` pipe, which `openssl` then sends to the
 client.
 
-In addition, `ehttpd` continuously restarts `busybox httpd` to handle
+In addition, `microhttpsd` continuously restarts `busybox httpd` to handle
 subsequent requests.
 
-`ehttpd` sets up a trap to clean up the named pipes and terminate `openssl`
+`microhttpsd` sets up a trap to clean up the named pipes and terminate `openssl`
 when it receives a `SIGINT`, `SIGTERM`, or `EXIT` signal.
 

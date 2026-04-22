@@ -1,5 +1,7 @@
 # microhttpsd
 
+*Replaced with https://github.com/cristianrz/SimpleGoWebServer*
+
 microhttpsd is a simple script that runs a secure web server on a Linux system only
 using `openssl` and `busybox httpd`. The web server can serve static files from a
 specified directory and supports HTTPS connections.
